@@ -10,17 +10,12 @@ Description: |
 
 Parameters:
   MyKey:
-    Description: 
+    Description: Choose your key pair.
     Type: AWS::EC2::KeyPair::KeyName
+
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
-
-Metadata:
-  
-Mappings:
-  
-Conditions:
   
 Resources:
   MySG:
@@ -44,22 +39,29 @@ Resources:
       KeyName: !Ref MyKey
       SecurityGroupIds: 
         - !Ref MySG
-      SecurityGroups: 
-        SecurityGroups
       Tags: 
         - Key: Name
           Value: !Sub Web Server of ${AWS::StackName}
       UserData: !Base64 |
-        #!/bin/bash
+        #! bin/bash
         yum update -y
         yum install python3
-        pip3 install
+        pip3 install flask
         cd /home/ec2-user
-        FOLDER = "buraya github raw linki gelecek"
+        FOLDER="https://raw.githubusercontent.com/yildizkubi/aws-projects/main/001-roman-numerals-converter/"
         wget ${FOLDER}/app.py
         mkdir templates && cd templates
-        wget ${FOLDER}/index.html
-        wget ${FOLDER}/result.html
-        
+        wget ${FOLDER}/templates/index.html
+        wget ${FOLDER}/templates/result.html
+        cd ..
+        python3 app.py
 
 Outputs:
+  WebSiteURL:
+    Value: !Sub
+     - http://${WebSiteURL}
+     - WebSiteURL: !GetAtt MyInstance.PublicDnsName
+  PrivateIp:
+    Value: !Sub
+     - Private Ip of instance is ${PrivateIp}
+     - PrivateIp: !GetAtt MyInstance.PrivateIp
